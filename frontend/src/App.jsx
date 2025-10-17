@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AsinInput from './components/AsinInput';
 import ComparisonView from './components/ComparisonView';
+import Com
 import HistoryView from './components/HistoryView';
 import LoadingSpinner from './components/LoadingSpinner';
 import { optimizeProduct } from './services/api';
