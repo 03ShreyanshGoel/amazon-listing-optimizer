@@ -77,60 +77,54 @@
 //     }
 //   }
 // }
-
 import puppeteer from 'puppeteer';
 
 export async function scrapeAmazonProduct(asin) {
   let browser;
-
   try {
-    console.log('Launching browser...');
-
+    const execPath = puppeteer.executablePath(); // points to Chrome in your cache
     browser = await puppeteer.launch({
-      headless: true, // use true, not 'new'
+      executablePath: execPath,
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
+        '--disable-dev-shm-usage'
       ],
-      defaultViewport: { width: 1920, height: 1080 }
+      defaultViewport: { width: 1366, height: 768 }
     });
 
-    console.log('✅ Browser launched successfully');
     const page = await browser.newPage();
-
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
     const url = `https://www.amazon.in/dp/${asin}`;
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    await page.waitForSelector('#productTitle', { timeout: 15000 });
 
     const productData = await page.evaluate(() => {
-      const data = { title: '', bullets: [], description: '' };
-      data.title = document.querySelector('#productTitle')?.textContent.trim() || '';
-      data.bullets = Array.from(document.querySelectorAll('#feature-bullets ul li span.a-list-item'))
-        .map(el => el.textContent.trim())
+      const title =
+        document.querySelector('#productTitle')?.textContent?.trim() || '';
+      const bullets = Array.from(
+        document.querySelectorAll('#feature-bullets ul li span.a-list-item')
+      )
+        .map(el => el.textContent?.trim() || '')
         .filter(Boolean);
-      data.description = 
-        document.querySelector('#productDescription')?.innerText.trim() ||
-        document.querySelector('#productDescription_feature_div .a-expander-content')?.innerText.trim() ||
-        document.querySelector('#aplus_feature_div')?.innerText.trim() ||
+
+      const description =
+        document.querySelector('#productDescription')?.textContent?.trim() ||
+        document
+          .querySelector('#productDescription_feature_div .a-expander-content')
+          ?.textContent?.trim() ||
+        document.querySelector('#aplus_feature_div')?.textContent?.trim() ||
         '';
-      return data;
+
+      return { title, bullets, description };
     });
 
-    console.log('✅ Data extracted successfully');
     return productData;
-
-  } catch (error) {
-    console.error('❌ Scraping error:', error);
-    throw new Error(`Failed to scrape Amazon product: ${error.message}`);
   } finally {
     if (browser) await browser.close();
   }
