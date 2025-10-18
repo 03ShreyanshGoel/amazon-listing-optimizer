@@ -1,13 +1,13 @@
 # Amazon Product Listing Optimizer
 
-An AI-powered web application that fetches Amazon product details by ASIN and generates optimized listings using OpenAI's GPT-4. The app provides side-by-side comparison of original and optimized content, stores optimization history, and tracks improvements over time.
+An AI-powered web application that fetches Amazon product details by ASIN and generates optimized listings using **Gemini-2.5-Flash**. The app provides side-by-side comparison of original and optimized content, stores optimization history, and tracks improvements over time.
 
 ---
 
 ## 🚀 Features
 
 - **ASIN-based Product Fetching**: Directly scrapes product details from Amazon product pages
-- **AI-Powered Optimization**: Uses GPT-4 to generate improved titles, bullet points, descriptions, and keywords
+- **AI-Powered Optimization**: Uses Gemini-2.5-Flash to generate improved titles, bullet points, descriptions, and keywords
 - **Side-by-Side Comparison**: Clean UI displaying original vs optimized content
 - **Optimization History**: MySQL database storing all optimizations with timestamps
 - **Historical Tracking**: View past optimizations for each ASIN and track improvements
@@ -21,7 +21,7 @@ An AI-powered web application that fetches Amazon product details by ASIN and ge
 - **Node.js** with Express.js
 - **MySQL** for data persistence
 - **Puppeteer** for web scraping Amazon product pages
-- **OpenAI GPT-4** for content optimization
+- **Gemini-2.5-Flash** for content optimization
 
 ### Frontend
 - **React** with Vite
@@ -37,7 +37,7 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
 - **MySQL** (v8 or higher) - [Download](https://dev.mysql.com/downloads/mysql/)
-- **OpenAI API Key** - [Get API Key](https://platform.openai.com/api-keys)
+- **Gemini API Key** (dummy placeholder)
 - **Git** (optional) - [Download](https://git-scm.com/)
 
 ---
@@ -58,17 +58,23 @@ cd backend
 npm install
 ```
 
-**Create `.env` file in the backend directory:**
+**Create `.env` file in the backend directory (dummy placeholders):**
 
 ```env
 PORT=5000
+NODE_ENV=development
+
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=amazon_optimizer
-OPENAI_API_KEY=your_openai_api_key_here
-NODE_ENV=development
+DB_PORT=3306
+
+GEMINI_API_KEY=your_gemini_api_key_here
+FRONTEND_URL=http://localhost:5173
 ```
+
+---
 
 ### 3. Frontend Setup
 
@@ -82,6 +88,8 @@ npm install
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
+
+---
 
 ### 4. Database Setup
 
@@ -119,25 +127,21 @@ CREATE TABLE products (
 
 ### Start Backend Server
 
-Open a terminal and run:
-
 ```bash
 cd backend
 npm run dev
 ```
 
-The backend will start on `http://localhost:5000`
+Backend will run on `http://localhost:5000`
 
 ### Start Frontend Development Server
-
-Open a new terminal and run:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-The frontend will start on `http://localhost:5173`
+Frontend will run on `http://localhost:5173`
 
 ### Access the Application
 
@@ -167,46 +171,14 @@ Open your browser and navigate to: **http://localhost:5173**
 
 ## 🤖 AI Prompt Engineering
 
-### Prompt Design Strategy
+The optimization prompt uses:
 
-The AI optimization uses a carefully crafted prompt with the following design principles:
+- **Role**: `"You are an Amazon SEO and copywriting expert."`
+- **Structured Input**: Original title, bullets, description
+- **Output**: Title, 5 bullets, description, 5 keywords in JSON
+- **Temperature**: 0.7 for creativity/consistency
 
-#### 1. **Role Establishment**
-```
-"You are an Amazon SEO and copywriting expert."
-```
-This sets the context and expertise level, ensuring the AI generates industry-appropriate content.
-
-#### 2. **Structured Input**
-The original product data (title, bullets, description) is provided in a clear, labeled format for better understanding.
-
-#### 3. **Specific Output Requirements**
-
-- **Title**: Max 200 characters, keyword-rich, readable, compelling
-- **Bullet Points**: Exactly 5 points, clear, concise, benefit-focused
-- **Description**: 150-250 words, persuasive but compliant with Amazon guidelines
-- **Keywords**: 5 relevant SEO suggestions
-
-#### 4. **JSON Format Enforcement**
-Requesting structured JSON output ensures:
-- Consistent, parseable responses
-- Easy integration into the application
-- No ambiguity in data extraction
-
-#### 5. **Temperature Setting (0.7)**
-Balances creativity with consistency:
-- High enough for varied, engaging content
-- Low enough for reliable, focused outputs
-
-### Why This Approach Works
-
-1. **Consistency**: JSON format guarantees structured, predictable outputs
-2. **Quality**: Specific constraints ensure practical, usable content
-3. **SEO Focus**: Explicitly optimizes for Amazon search visibility
-4. **Compliance**: Mentions Amazon guidelines to avoid policy violations
-5. **Actionable**: Generates ready-to-use content without post-processing
-
-### Example Prompt Structure
+**Example Prompt:**
 
 ```
 You are an Amazon SEO and copywriting expert. Optimize the following:
@@ -221,7 +193,7 @@ Provide:
 3. Enhanced description (150-250 words, persuasive)
 4. 5 keyword suggestions
 
-Format as JSON: {...}
+Format as JSON
 ```
 
 ---
@@ -231,45 +203,34 @@ Format as JSON: {...}
 ```
 amazon-listing-optimizer/
 ├── backend/
-│   ├── config/
-│   │   └── database.js          # MySQL connection pool configuration
-│   ├── controllers/
-│   │   └── productController.js # Handles business logic for products
-│   ├── middleware/
-│   │   └── errorHandler.js      # Global error handling middleware
-│   ├── models/
-│   │   └── Product.js           # Database queries / ORM model for products
-│   ├── routes/
-│   │   └── productRoutes.js     # Express routes for product-related APIs
+│   ├── config/database.js
+│   ├── controllers/productController.js
+│   ├── middleware/errorHandler.js
+│   ├── models/Product.js
+│   ├── routes/productRoutes.js
 │   ├── services/
-│   │   ├── aiOptimizer.js       # Integrates with OpenAI for listing optimization
-│   │   └── amazonScraper.js     # Puppeteer scraper to fetch Amazon product details
-│   ├── .env                     # Environment variables (DB credentials, API keys)
-│   ├── .gitignore               # Git ignore rules
-│   ├── package.json             # Backend dependencies & scripts
-│   ├── puppeteer.config.cjs     # Puppeteer configuration to persist cached browser
-│   ├── railway.json             # Deployment configuration for Railway
-│   └── server.js                # Express app initialization & middleware setup
-├── frontend/                     # Vite + React + Tailwind frontend
-│   ├── src/
-│   │   ├── components/           # Reusable React components
-│   │   │   ├── AsinInput.jsx        # Form to input product ASIN
-│   │   │   ├── ComparisonView.jsx   # Component to display optimized vs original listing
-│   │   │   ├── HistoryView.jsx      # Component to display past optimization history
-│   │   │   └── LoadingSpinner.jsx   # Spinner displayed while fetching/processing data
-│   │   ├── services/
-│   │   │   └── api.js             # Axios/fetch client to interact with backend APIs
-│   │   ├── App.jsx               # Main React component
-│   │   ├── App.css               # Global styles
-│   │   ├── index.css             # Global CSS resets & styles
-│   │   └── main.jsx              # React app entry point
-│   ├── .env                     # Environment variables for frontend
-│   ├── index.html               # Main HTML file
-│   ├── package.json             # Frontend dependencies & scripts
-│   ├── postcss.config.js        # PostCSS configuration
-│   └── tailwindcss.config.js    # TailwindCSS configuration
-└── README.md                      # Project documentation / setup instructions
-
+│   │   ├── aiOptimizer.js
+│   │   └── amazonScraper.js
+│   ├── .env
+│   ├── .gitignore
+│   ├── package.json
+│   └── server.js
+├── frontend/
+│   ├── src/components/
+│   │   ├── AsinInput.jsx
+│   │   ├── ComparisonView.jsx
+│   │   ├── HistoryView.jsx
+│   │   └── LoadingSpinner.jsx
+│   ├── src/services/api.js
+│   ├── src/App.jsx
+│   ├── src/App.css
+│   ├── src/index.css
+│   └── src/main.jsx
+│   ├── .env
+│   ├── index.html
+│   ├── package.json
+│   └── tailwindcss.config.js
+└── README.md
 ```
 
 ---
@@ -292,17 +253,8 @@ Optimize a product listing by ASIN.
   "success": true,
   "data": {
     "asin": "B08N5WRWNW",
-    "original": {
-      "title": "Apple AirPods Pro...",
-      "bullets": ["Active Noise Cancellation...", ...],
-      "description": "..."
-    },
-    "optimized": {
-      "title": "Apple AirPods Pro - Premium Wireless...",
-      "bullets": ["Advanced ANC Technology...", ...],
-      "description": "...",
-      "keywords": ["wireless earbuds", "noise cancelling", ...]
-    }
+    "original": {...},
+    "optimized": {..., "keywords": ["wireless earbuds", "noise cancelling", ...]}
   }
 }
 ```
@@ -315,192 +267,34 @@ Get all optimization history.
 
 ---
 
-## 🗄️ Database Schema
+## 🔒 Security & Best Practices
 
-```sql
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    asin VARCHAR(20) NOT NULL,
-    original_title TEXT,
-    original_bullets TEXT,          -- JSON array stored as string
-    original_description TEXT,
-    optimized_title TEXT,
-    optimized_bullets TEXT,         -- JSON array stored as string
-    optimized_description TEXT,
-    keywords TEXT,                  -- JSON array stored as string
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_asin (asin),          -- Fast ASIN lookups
-    INDEX idx_created_at (created_at) -- Time-based queries
-);
-```
-
-**Design Decisions:**
-- **JSON Storage**: Bullet points and keywords stored as JSON strings for flexibility
-- **TEXT Fields**: Accommodate varying content lengths
-- **Indexes**: Optimize common queries (ASIN lookups, time-based sorting)
-- **Timestamps**: Track when each optimization was performed
-
----
-
-## 🚧 Challenges & Solutions
-
-### 1. Amazon Anti-Scraping Measures
-
-**Challenge**: Amazon blocks automated scraping attempts.
-
-**Solution**:
-- Used Puppeteer with Stealth Plugin to avoid detection
-- Randomized user agents
-- Implemented proper delays between requests
-- Headless browser with realistic behavior patterns
-
-### 2. Varying HTML Structures
-
-**Challenge**: Amazon uses different layouts for different product types.
-
-**Solution**:
-- Multiple selector strategies with fallbacks
-- Robust error handling for missing elements
-- Graceful degradation when data is unavailable
-
-### 3. AI Response Consistency
-
-**Challenge**: GPT-4 responses need to be parseable and structured.
-
-**Solution**:
-- Enforced JSON output format in prompts
-- Regex extraction as fallback for JSON parsing
-- Validation of required fields before database storage
-
-### 4. Performance Optimization
-
-**Challenge**: Scraping and AI processing are slow operations.
-
-**Solution**:
-- Clear loading states in UI
-- Async/await patterns throughout
-- Database connection pooling
-- Indexed database queries for fast history retrieval
-
----
-
-## 🔒 Security Considerations
-
-1. **API Keys**: Never commit `.env` files (included in `.gitignore`)
-2. **SQL Injection**: Using parameterized queries with mysql2
-3. **Input Validation**: ASIN format validation before processing
-4. **XSS Protection**: React automatically escapes content
-5. **CORS**: Configured for specific frontend origin
-6. **Rate Limiting**: Consider implementing for production use
-
----
-
-## 🐛 Troubleshooting
-
-### Issue: Puppeteer Installation Fails
-
-**Solution (Linux):**
-```bash
-sudo apt-get install -y libnss3 libatk-bridge2.0-0 libx11-xcb1
-```
-
-### Issue: MySQL Connection Error
-
-**Solution:**
-```bash
-mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
-FLUSH PRIVILEGES;
-```
-
-### Issue: OpenAI Rate Limit
-
-**Solution:**
-- Upgrade to paid plan for higher limits
-- Implement request queuing
-- Add exponential backoff retry logic
-
-### Issue: Amazon Scraping Blocked
-
-**Solution:**
-- Check if Amazon updated their HTML structure
-- Try different user agents
-- Consider using a proxy service
-- Add longer delays between requests
+- Never commit `.env` files
+- Parameterized queries to prevent SQL injection
+- ASIN input validation
+- CORS configured for frontend
+- Rate limiting recommended in production
 
 ---
 
 ## 📈 Future Enhancements
 
-- [ ] Batch processing for multiple ASINs
-- [ ] Export optimized content to CSV/Excel
-- [ ] A/B testing for optimization strategies
-- [ ] Analytics dashboard with charts
-- [ ] User authentication and multi-user support
-- [ ] Competitor analysis features
-- [ ] Image optimization suggestions
-- [ ] Real-time optimization status via WebSockets
-- [ ] Version control for optimizations
-- [ ] Browser extension for direct Amazon integration
-
----
-
-## 📝 Assumptions & Design Decisions
-
-### Assumptions
-
-1. **Amazon Structure**: Product pages follow consistent HTML patterns
-2. **ASIN Format**: All ASINs are exactly 10 alphanumeric characters
-3. **English Content**: Optimization focused on English-language listings
-4. **GPT-4 Access**: User has access to OpenAI API with GPT-4
-5. **Legal Compliance**: Scraping for personal/educational use only
-
-### Design Decisions
-
-1. **Puppeteer over Axios**: Handles JavaScript-rendered content
-2. **MySQL over NoSQL**: Relational data with clear schema
-3. **Vite over CRA**: Faster development experience
-4. **Component-based React**: Reusable, maintainable UI
-5. **Express.js**: Lightweight, flexible backend framework
-6. **JSON Storage**: Flexibility for varying array lengths
+- Batch processing
+- Export to CSV/Excel
+- Analytics dashboard
+- User authentication
+- Competitor analysis
+- Image optimization suggestions
+- Real-time status via WebSockets
+- Version control for optimizations
+- Browser extension for Amazon integration
 
 ---
 
 ## 📄 License
 
-MIT License - Free to use for learning and development purposes.
+MIT License – free to use for learning and development.
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
----
-
-## 📧 Support
-
-For questions or issues:
-- Open an issue on GitHub
-- Check the troubleshooting section
-- Review OpenAI API documentation
-- Consult Amazon's scraping policies
-
----
-
-## 🙏 Acknowledgments
-
-- **OpenAI** for GPT-4 API
-- **Puppeteer Team** for web scraping tools
-- **React Community** for excellent documentation
-- **Tailwind CSS** for utility-first styling
-- **Express.js** for robust backend framework
-
----
-
-**Built with ❤️ for the SalesDuo Internship Assignment**
+**Built with ❤️ using Gemini-2.5-Flash**
