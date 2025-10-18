@@ -49,7 +49,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   process.env.FRONTEND_URL,
-  'https://your-app.vercel.app' // Replace with your actual Vercel URL
+  'https://try-alo.vercel.app/' 
 ].filter(Boolean);
 
 app.use(cors({
