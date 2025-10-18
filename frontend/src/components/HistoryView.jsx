@@ -15,6 +15,7 @@ const HistoryView = () => {
     try {
       setLoading(true);
       const response = await getAllHistory();
+      console.log("history in frontend",response);
       setHistory(response.data);
     } catch (err) {
       setError('Failed to load history');

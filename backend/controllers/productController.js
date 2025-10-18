@@ -69,7 +69,7 @@ export const getProductHistory = async (req, res, next) => {
     const { asin } = req.params;
 
     const history = await Product.findByAsin(asin);
-
+    console.log(`history of ${asin}:`, history);
     res.json({
       success: true,
       data: history
@@ -83,7 +83,7 @@ export const getProductHistory = async (req, res, next) => {
 export const getAllHistory = async (req, res, next) => {
   try {
     const history = await Product.findAll();
-
+    console.log("history:", history);
     res.json({
       success: true,
       data: history

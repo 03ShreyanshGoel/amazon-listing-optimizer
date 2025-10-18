@@ -41,20 +41,39 @@ export const Product = {
     }));
   },
 
+  // async findAll(limit = 50) {
+  //   const query = `
+  //     SELECT * FROM products 
+  //     ORDER BY created_at DESC 
+  //     LIMIT ?
+  //   `;
+    
+  //   const [rows] = await pool.execute(query, [limit]);
+    
+  //   return rows.map(row => ({
+  //     ...row,
+  //     original_bullets: JSON.parse(row.original_bullets),
+  //     optimized_bullets: JSON.parse(row.optimized_bullets),
+  //     keywords: JSON.parse(row.keywords)
+  //   }));
+  // }
   async findAll(limit = 50) {
-    const query = `
-      SELECT * FROM products 
-      ORDER BY created_at DESC 
-      LIMIT ?
-    `;
-    
-    const [rows] = await pool.execute(query, [limit]);
-    
-    return rows.map(row => ({
-      ...row,
-      original_bullets: JSON.parse(row.original_bullets),
-      optimized_bullets: JSON.parse(row.optimized_bullets),
-      keywords: JSON.parse(row.keywords)
-    }));
-  }
+  limit = Number(limit);
+  if (isNaN(limit) || limit <= 0) limit = 50;
+
+  const query = `
+    SELECT * FROM products 
+    ORDER BY created_at DESC 
+    LIMIT ${limit}
+  `;
+
+  const [rows] = await pool.query(query);
+  
+  return rows.map(row => ({
+    ...row,
+    original_bullets: JSON.parse(row.original_bullets),
+    optimized_bullets: JSON.parse(row.optimized_bullets),
+    keywords: JSON.parse(row.keywords)
+  }));
+}
 };

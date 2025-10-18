@@ -23,7 +23,7 @@ const AsinInput = ({ onSubmit, loading }) => {
     <div className="w-full max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="asin" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="asin" className="block font-medium text-gray-700 mb-2">
             Enter Amazon ASIN
           </label>
           <div className="flex gap-2">
@@ -33,14 +33,14 @@ const AsinInput = ({ onSubmit, loading }) => {
               value={asin}
               onChange={(e) => setAsin(e.target.value.toUpperCase())}
               placeholder="e.g., B08N5WRWNW"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent "
               maxLength={10}
               disabled={loading}
             />
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+              className="px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
             >
               <FiSearch />
               Optimize

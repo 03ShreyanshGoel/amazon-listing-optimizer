@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import AsinInput from './components/AsinInput';
 import ComparisonView from './components/ComparisonView';
-import Com
 import HistoryView from './components/HistoryView';
 import LoadingSpinner from './components/LoadingSpinner';
 import { optimizeProduct } from './services/api';
@@ -36,20 +35,20 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-5xl font-bold text-gray-800 mb-2">
             Amazon Listing Optimizer
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-lg">
             AI-powered optimization for your Amazon product listings
           </p>
         </header>
 
         {/* Navigation */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex justify-center gap-4 mb-12">
           <button
             onClick={() => {
               setShowHistory(false);
@@ -57,7 +56,7 @@ function App() {
             }}
             className={`px-6 py-2 rounded-lg transition-colors ${
               !showHistory
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-700 text-white hover:bg-blue-800 '
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -67,7 +66,7 @@ function App() {
             onClick={() => setShowHistory(true)}
             className={`px-6 py-2 rounded-lg transition-colors ${
               showHistory
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-700 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >

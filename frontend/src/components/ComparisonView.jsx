@@ -81,7 +81,7 @@ const ComparisonView = ({ data }) => {
               {data.optimized.keywords.map((keyword, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full"
+                  className="px-3 py-1 bg-blue-700 text-white text-sm rounded-full"
                 >
                   {keyword}
                 </span>
