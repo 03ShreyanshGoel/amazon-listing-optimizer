@@ -101,7 +101,7 @@ export async function scrapeAmazonProduct(asin) {
     );
 
     const url = `https://www.amazon.in/dp/${asin}`;
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
     // Extract product data using updated selectors
     const productData = await page.evaluate(() => {
