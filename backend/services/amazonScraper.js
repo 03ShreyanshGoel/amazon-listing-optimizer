@@ -77,50 +77,52 @@
 //     }
 //   }
 // }
+import puppeteer from 'puppeteer';
 
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
-
-puppeteer.use(StealthPlugin());
-puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
-
-/**
- * Scrape Amazon product data by ASIN
- * @param {string} asin - Amazon product ASIN
- * @returns {Promise<{title: string, bullets: string[], description: string}>}
- */
 export async function scrapeAmazonProduct(asin) {
   let browser;
-
+  
   try {
-    // Launch Puppeteer with cloud-safe options
-    browser = await puppeteer.launch({
-      headless: true,
+    console.log('Launching browser...');
+    
+    // Browser configuration
+    const launchOptions = {
+      headless: 'new',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-extensions',
-        '--disable-gpu',
-        '--window-size=1920,1080'
-      ],
-      defaultViewport: { width: 1920, height: 1080 },
-    });
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
+    };
+    
+    // Use system Chrome in production (Render)
+    if (process.env.NODE_ENV === 'production') {
+      launchOptions.executablePath = '/usr/bin/google-chrome-stable';
+    }
+    
+    browser = await puppeteer.launch(launchOptions);
+    console.log('✅ Browser launched successfully');
 
     const page = await browser.newPage();
-
-    // Set a realistic user agent
+    
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
-    const url = `https://www.amazon.in/dp/${asin}`;
+    const url = `https://www.amazon.com/dp/${asin}`;
+    console.log(`Navigating to: ${url}`);
+    
+    await page.goto(url, { 
+      waitUntil: 'networkidle2', 
+      timeout: 30000 
+    });
 
-    // Navigate to Amazon product page with timeout
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    console.log('Page loaded, extracting data...');
 
-    // Extract product data
     const productData = await page.evaluate(() => {
       const data = {
         title: '',
@@ -128,35 +130,39 @@ export async function scrapeAmazonProduct(asin) {
         description: ''
       };
 
-      // Extract title
       const titleElement = document.querySelector('#productTitle');
-      if (titleElement) data.title = titleElement.textContent.trim();
+      if (titleElement) {
+        data.title = titleElement.textContent.trim();
+      }
 
-      // Extract bullet points
       const bulletElements = document.querySelectorAll('#feature-bullets ul li span.a-list-item');
       data.bullets = Array.from(bulletElements)
-        .map(b => b.textContent.trim())
+        .map(bullet => bullet.textContent.trim())
         .filter(text => text.length > 0);
 
-      // Extract description with fallback selectors
-      let description = document.querySelector('#productDescription')?.innerText.trim() || '';
-      if (!description) {
-        description = document.querySelector('#productDescription_feature_div .a-expander-content')?.innerText.trim() || '';
+      const descElement = document.querySelector('#productDescription p');
+      if (descElement) {
+        data.description = descElement.textContent.trim();
+      } else {
+        const altDesc = document.querySelector('#aplus');
+        if (altDesc) {
+          data.description = altDesc.textContent.trim().substring(0, 500);
+        }
       }
-      if (!description) {
-        description = document.querySelector('#aplus_feature_div')?.innerText.trim() || '';
-      }
-      data.description = description;
 
       return data;
     });
 
+    console.log('✅ Data extracted successfully');
     return productData;
 
   } catch (error) {
-    console.error('Scraping error:', error);
+    console.error('❌ Scraping error:', error);
     throw new Error(`Failed to scrape Amazon product: ${error.message}`);
   } finally {
-    if (browser) await browser.close();
+    if (browser) {
+      await browser.close();
+      console.log('Browser closed');
+    }
   }
 }
