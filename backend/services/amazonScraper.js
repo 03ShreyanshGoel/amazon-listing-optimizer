@@ -85,7 +85,7 @@ export async function scrapeAmazonProduct(asin) {
   try {
     console.log('Launching browser...');
     
-    // Browser configuration
+    // Browser configuration - Let Puppeteer find Chrome automatically
     const launchOptions = {
       headless: 'new',
       args: [
@@ -95,14 +95,13 @@ export async function scrapeAmazonProduct(asin) {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
+        '--single-process',
         '--disable-gpu'
       ]
     };
     
-    // Use system Chrome in production (Render)
-    if (process.env.NODE_ENV === 'production') {
-      launchOptions.executablePath = '/usr/bin/google-chrome-stable';
-    }
+    // Don't set executablePath - let Puppeteer use the downloaded Chrome
+    // The build command downloads Chrome to the right location
     
     browser = await puppeteer.launch(launchOptions);
     console.log('✅ Browser launched successfully');
@@ -113,7 +112,7 @@ export async function scrapeAmazonProduct(asin) {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
-    const url = `https://www.amazon.com/dp/${asin}`;
+    const url = `https://www.amazon.in/dp/${asin}`;
     console.log(`Navigating to: ${url}`);
     
     await page.goto(url, { 
