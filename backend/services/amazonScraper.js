@@ -77,17 +77,17 @@
 //     }
 //   }
 // }
+
 import puppeteer from 'puppeteer';
 
 export async function scrapeAmazonProduct(asin) {
   let browser;
-  
+
   try {
     console.log('Launching browser...');
-    
-    // Browser configuration - Let Puppeteer find Chrome automatically
-    const launchOptions = {
-      headless: 'new',
+
+    browser = await puppeteer.launch({
+      headless: true, // use true, not 'new'
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -97,58 +97,31 @@ export async function scrapeAmazonProduct(asin) {
         '--no-zygote',
         '--single-process',
         '--disable-gpu'
-      ]
-    };
-    
-    // Don't set executablePath - let Puppeteer use the downloaded Chrome
-    // The build command downloads Chrome to the right location
-    
-    browser = await puppeteer.launch(launchOptions);
-    console.log('✅ Browser launched successfully');
+      ],
+      defaultViewport: { width: 1920, height: 1080 }
+    });
 
+    console.log('✅ Browser launched successfully');
     const page = await browser.newPage();
-    
+
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
     const url = `https://www.amazon.in/dp/${asin}`;
-    console.log(`Navigating to: ${url}`);
-    
-    await page.goto(url, { 
-      waitUntil: 'networkidle2', 
-      timeout: 30000 
-    });
-
-    console.log('Page loaded, extracting data...');
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
     const productData = await page.evaluate(() => {
-      const data = {
-        title: '',
-        bullets: [],
-        description: ''
-      };
-
-      const titleElement = document.querySelector('#productTitle');
-      if (titleElement) {
-        data.title = titleElement.textContent.trim();
-      }
-
-      const bulletElements = document.querySelectorAll('#feature-bullets ul li span.a-list-item');
-      data.bullets = Array.from(bulletElements)
-        .map(bullet => bullet.textContent.trim())
-        .filter(text => text.length > 0);
-
-      const descElement = document.querySelector('#productDescription p');
-      if (descElement) {
-        data.description = descElement.textContent.trim();
-      } else {
-        const altDesc = document.querySelector('#aplus');
-        if (altDesc) {
-          data.description = altDesc.textContent.trim().substring(0, 500);
-        }
-      }
-
+      const data = { title: '', bullets: [], description: '' };
+      data.title = document.querySelector('#productTitle')?.textContent.trim() || '';
+      data.bullets = Array.from(document.querySelectorAll('#feature-bullets ul li span.a-list-item'))
+        .map(el => el.textContent.trim())
+        .filter(Boolean);
+      data.description = 
+        document.querySelector('#productDescription')?.innerText.trim() ||
+        document.querySelector('#productDescription_feature_div .a-expander-content')?.innerText.trim() ||
+        document.querySelector('#aplus_feature_div')?.innerText.trim() ||
+        '';
       return data;
     });
 
@@ -159,9 +132,6 @@ export async function scrapeAmazonProduct(asin) {
     console.error('❌ Scraping error:', error);
     throw new Error(`Failed to scrape Amazon product: ${error.message}`);
   } finally {
-    if (browser) {
-      await browser.close();
-      console.log('Browser closed');
-    }
+    if (browser) await browser.close();
   }
 }
